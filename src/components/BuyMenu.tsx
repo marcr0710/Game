@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { PlayerState, WeaponId } from "@/game/types";
-import { WEAPONS } from "@/game/weapons";
+import { WEAPONS, weaponBlurb } from "@/game/weapons";
 import { buyArmor, buyWeapon } from "@/game/engine";
 
 const ORDER: WeaponId[] = ["glock", "usp", "ak47", "m4", "awp"];
@@ -18,8 +18,8 @@ export function BuyMenu({
 }) {
   const p = player;
   return (
-    <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 p-3 backdrop-blur-md">
-      <div className="mx-auto max-w-3xl rounded-md border border-border bg-background/60 p-3">
+    <div className="pointer-events-auto shrink-0 border-t border-border bg-card p-3">
+      <div className="mx-auto max-w-4xl">
         <div className="mb-2 flex items-baseline justify-between">
           <h3 className="font-display text-sm tracking-wide">
             Buy · {p.team === "T" ? "Terrorist" : "Counter-Terrorist"}
@@ -41,8 +41,12 @@ export function BuyMenu({
                 variant={p.weapon === id ? "default" : "outline"}
                 disabled={locked || poor}
                 onClick={() => onBuy(id)}
+                className="h-auto flex-col items-start gap-0 px-3 py-1.5"
               >
-                {w.name} ${w.cost}
+                <span>
+                  {w.name} ${w.cost}
+                </span>
+                <span className="font-mono text-[9px] font-normal opacity-70">{weaponBlurb(id)}</span>
               </Button>
             );
           })}

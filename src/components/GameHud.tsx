@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import type { MatchState, PlayerState } from "@/game/types";
 import { DEFUSE_TIME, PLANT_TIME } from "@/game/types";
-import { WEAPONS } from "@/game/weapons";
+import { WEAPONS, weaponBlurb } from "@/game/weapons";
 
 function Bar({ value }: { value: number }) {
   return (
@@ -14,7 +14,7 @@ function Bar({ value }: { value: number }) {
 function PlayerPanel({ p, side }: { p: PlayerState; side: "left" | "right" }) {
   const w = WEAPONS[p.weapon];
   return (
-    <div className={`flex min-w-0 flex-1 flex-col gap-1 ${side === "right" ? "items-end text-right" : ""}`}>
+    <div className={`flex min-w-0 flex-1 flex-col gap-0.5 ${side === "right" ? "items-end text-right" : ""}`}>
       <div className="flex items-center gap-2 font-display text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
         <span className={p.team === "T" ? "text-[var(--t-col)]" : "text-[var(--ct-col)]"}>
           {p.team === "T" ? "Terrorist" : "Counter-Terrorist"}
@@ -30,6 +30,7 @@ function PlayerPanel({ p, side }: { p: PlayerState; side: "left" | "right" }) {
       <div className="font-mono text-xs text-muted-foreground">
         {w.name} · {p.weapon === "knife" ? "—" : `${p.ammo}/${p.reserve}`} · ${p.money}
       </div>
+      <div className="font-mono text-[10px] text-muted-foreground/80">{weaponBlurb(p.weapon)}</div>
     </div>
   );
 }
@@ -50,14 +51,14 @@ export function GameHud({ state, localId = 0 }: { state: MatchState; localId?: 0
           : "—";
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col gap-2 p-3">
+    <div className="flex shrink-0 flex-col gap-2 border-b border-border bg-card px-3 py-2">
       <div className="flex items-start justify-between gap-4">
         <PlayerPanel p={me.team === "T" ? t : ct} side="left" />
-        <div className="flex flex-col items-center rounded-md border border-border bg-card/90 px-4 py-2 backdrop-blur-sm">
+        <div className="flex flex-col items-center rounded-md border border-border bg-background px-4 py-1.5">
           <div className="font-display text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
             Round {Math.max(1, state.round)} · First to {state.rules.winScore}
           </div>
-          <div className="mt-1 flex items-center gap-3 font-mono text-xl tabular-nums">
+          <div className="mt-0.5 flex items-center gap-3 font-mono text-xl tabular-nums">
             <span className="text-[var(--t-col)]">{state.tScore}</span>
             <span className="text-muted-foreground">:</span>
             <span className="text-[var(--ct-col)]">{state.ctScore}</span>

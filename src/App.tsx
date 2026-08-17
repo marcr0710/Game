@@ -283,25 +283,9 @@ export default function App() {
       </header>
 
       <main className="relative flex min-h-0 flex-1 flex-col">
+        {s.phase !== "menu" && <GameHud state={s} localId={localId} />}
         <div className="relative min-h-0 flex-1 bg-[#070b10]">
           <canvas ref={canvasRef} className="block h-full w-full cursor-crosshair touch-none" />
-          {s.phase !== "menu" && <GameHud state={s} localId={localId} />}
-          {s.phase === "buy" && (
-            <BuyMenu
-              player={s.players[localId]}
-              seconds={s.buyTimer}
-              onBuy={(id) => {
-                if (role === "host" || role === "solo") buyWeapon(s.players[localId], id);
-                else netRef.current.send({ t: "buy", weapon: id });
-                setUi((n) => n + 1);
-              }}
-              onArmor={() => {
-                if (role === "host" || role === "solo") buyArmor(s.players[localId]);
-                else netRef.current.send({ t: "armor" });
-                setUi((n) => n + 1);
-              }}
-            />
-          )}
           {s.phase === "round_end" && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/40">
               <BlurFade>
@@ -431,6 +415,22 @@ export default function App() {
             </div>
           )}
         </div>
+        {s.phase === "buy" && (
+          <BuyMenu
+            player={s.players[localId]}
+            seconds={s.buyTimer}
+            onBuy={(id) => {
+              if (role === "host" || role === "solo") buyWeapon(s.players[localId], id);
+              else netRef.current.send({ t: "buy", weapon: id });
+              setUi((n) => n + 1);
+            }}
+            onArmor={() => {
+              if (role === "host" || role === "solo") buyArmor(s.players[localId]);
+              else netRef.current.send({ t: "armor" });
+              setUi((n) => n + 1);
+            }}
+          />
+        )}
       </main>
     </div>
   );

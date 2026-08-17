@@ -80,17 +80,25 @@ function circleHitsWall(x: number, y: number, r: number) {
   );
 }
 
+function pickSpawn(team: Team): { x: number; y: number } {
+  const kind = team === "T" ? 2 : 3;
+  const spots = spawnPoints(kind);
+  if (spots.length === 0) return { x: team === "T" ? 80 : 1260, y: 390 };
+  const sorted = [...spots].sort((a, b) => (team === "T" ? a.x - b.x : b.x - a.x));
+  const mid = sorted[Math.floor(sorted.length / 2)] ?? sorted[0];
+  return mid;
+}
+
 function freshPlayer(id: 0 | 1, team: Team, money: number): PlayerState {
-  const spawns = spawnPoints(team === "T" ? 2 : 3);
-  const s = spawns[id % spawns.length] ?? { x: 80, y: 80 };
+  const s = pickSpawn(team);
   const w = defaultWeapon(team);
   const def = WEAPONS[w];
   return {
     id,
     team,
-    x: s.x + (id === 0 ? 0 : 18),
+    x: s.x,
     y: s.y,
-    angle: team === "T" ? 0.2 : Math.PI,
+    angle: team === "T" ? 0 : Math.PI,
     hp: 100,
     armor: 0,
     money,
