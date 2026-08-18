@@ -27,10 +27,9 @@ function PlayerPanel({ p, side }: { p: PlayerState; side: "left" | "right" }) {
         <span className="text-sm text-foreground/80">{p.armor}</span>
         <span className="text-xs text-muted-foreground">AR</span>
       </div>
-      <div className="font-mono text-xs text-muted-foreground">
+      <div className="font-mono text-[11px] text-muted-foreground">
         {w.name} · {p.weapon === "knife" ? "—" : `${p.ammo}/${p.reserve}`} · ${p.money}
       </div>
-      <div className="font-mono text-[10px] text-muted-foreground/80">{weaponBlurb(p.weapon)}</div>
     </div>
   );
 }

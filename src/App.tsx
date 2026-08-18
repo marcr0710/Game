@@ -44,6 +44,7 @@ export default function App() {
   const [maxRounds, setMaxRounds] = useState(6);
   const [winScore, setWinScore] = useState(4);
   const [fuse, setFuse] = useState(35);
+  const [buyOpen, setBuyOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -88,6 +89,11 @@ export default function App() {
       }
       const s = stateRef.current;
       const id = localIdRef.current;
+      if (s.phase === "buy" && e.code === "KeyB") {
+        e.preventDefault();
+        setBuyOpen((open) => !open);
+        return;
+      }
       if (s.phase === "buy") {
         const kind = tryBuyHotkeys(s.players[id], e.code);
         if (kind && netRef.current.role === "guest") {
@@ -267,8 +273,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (s.phase === "buy") setBuyOpen(true);
-  }, [s.phase, s.round]);
+    if (s.phase !== "buy") setBuyOpen(false);
+  }, [s.phase]);
 
   return (
     <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-background text-foreground">
