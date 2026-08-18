@@ -184,6 +184,9 @@ export default function App() {
         if (ctx && s.phase !== "menu") renderFor(ctx, s, localIdRef.current, canvas.width, canvas.height);
       }
       uiAcc += dt;
+      if (s.phase === "buy") {
+        /* keep B-toggle; reopen each new buy via round change below */
+      }
       if (s.phase !== "menu" && uiAcc > 0.08) {
         uiAcc = 0;
         setUi((n) => n + 1);
@@ -248,6 +251,7 @@ export default function App() {
     setRole("solo");
     setStatus("solo practice");
     applyRules();
+    setBuyOpen(true);
     startMatch(stateRef.current);
     setUi((n) => n + 1);
   };
@@ -262,8 +266,12 @@ export default function App() {
     if (q) setJoinCode(q);
   }, []);
 
+  useEffect(() => {
+    if (s.phase === "buy") setBuyOpen(true);
+  }, [s.phase, s.round]);
+
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-background text-foreground">
       <header className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="flex items-center gap-3">
           <img src="https://appdirect.com/shortcut-icon.ico" alt="" className="size-6 rounded-sm" />
@@ -293,7 +301,7 @@ export default function App() {
                   <CardContent className="pt-6">
                     <p className="font-display text-xl">{s.endReason}</p>
                     <p className="mt-2 font-mono text-sm text-muted-foreground">
-                      {s.winner ? `${s.winner === "T" ? "Terrorists" : "CTs"} take the map` : "Next round shortly"}
+                      {s.winner ? `${s.winner} takes the map` : "Next round shortly"}
                     </p>
                   </CardContent>
                 </Card>
@@ -405,9 +413,9 @@ export default function App() {
                       )}
                     </div>
                     <div className="font-mono text-xs text-muted-foreground">
-                      WASD move · mouse aim · click fire · R reload · E plant / defuse · 1–6 buy
+                      WASD move · mouse aim · click fire · R reload · E plant / defuse · B buy · 1–6 items
                       <br />
-                      Bomb carrier alternates each round (odd: P1 plants, even: P2 plants).
+                      Bomb carrier alternates each round. Score stays on P1 / P2 when sides swap.
                     </div>
                   </CardContent>
                 </Card>
@@ -416,20 +424,30 @@ export default function App() {
           )}
         </div>
         {s.phase === "buy" && (
-          <BuyMenu
-            player={s.players[localId]}
-            seconds={s.buyTimer}
-            onBuy={(id) => {
-              if (role === "host" || role === "solo") buyWeapon(s.players[localId], id);
-              else netRef.current.send({ t: "buy", weapon: id });
-              setUi((n) => n + 1);
-            }}
-            onArmor={() => {
-              if (role === "host" || role === "solo") buyArmor(s.players[localId]);
-              else netRef.current.send({ t: "armor" });
-              setUi((n) => n + 1);
-            }}
-          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 z-30 flex justify-center px-3">
+            {buyOpen ? (
+              <div className="pointer-events-auto w-full max-w-md overflow-hidden rounded-md border border-border bg-card/95 shadow-lg backdrop-blur-sm">
+                <BuyMenu
+                  player={s.players[localId]}
+                  seconds={s.buyTimer}
+                  onBuy={(id) => {
+                    if (role === "host" || role === "solo") buyWeapon(s.players[localId], id);
+                    else netRef.current.send({ t: "buy", weapon: id });
+                    setUi((n) => n + 1);
+                  }}
+                  onArmor={() => {
+                    if (role === "host" || role === "solo") buyArmor(s.players[localId]);
+                    else netRef.current.send({ t: "armor" });
+                    setUi((n) => n + 1);
+                  }}
+                />
+              </div>
+            ) : (
+              <p className="pointer-events-none rounded bg-background/70 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Press B to buy · {Math.ceil(s.buyTimer)}s
+              </p>
+            )}
+          </div>
         )}
       </main>
     </div>

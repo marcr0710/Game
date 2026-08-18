@@ -46,6 +46,10 @@ export interface PlayerState {
   plantProgress: number;
   defuseProgress: number;
   reloadUntil: number;
+  /** World angle from victim toward attacker when last hit. */
+  lastHitAngle: number;
+  /** Seconds remaining on the directional hit flash. */
+  lastHitFlash: number;
 }
 
 export interface Bullet {
@@ -77,6 +81,7 @@ export interface MatchState {
   round: number;
   tScore: number;
   ctScore: number;
+  pScores: [number, number];
   timer: number;
   buyTimer: number;
   endTimer: number;
@@ -84,7 +89,7 @@ export interface MatchState {
   bomb: Bomb;
   players: [PlayerState, PlayerState];
   bullets: Bullet[];
-  winner: Team | null;
+  winner: "P1" | "P2" | null;
   rules: MatchRules;
 }
 
@@ -92,8 +97,8 @@ export const TILE = 28;
 export const MAP_W = 48;
 export const MAP_H = 28;
 export const PLAYER_R = 10;
-/** Total field of view in radians (50°). */
-export const FOV = (50 * Math.PI) / 180;
+/** Total field of view in radians (90°). */
+export const FOV = (90 * Math.PI) / 180;
 export const VIEW_RANGE = 560;
 export const ROUND_TIME = 90;
 export const BUY_TIME = 12;

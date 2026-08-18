@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @source "../";
 
+html,
+body,
+#root {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  margin: 0;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

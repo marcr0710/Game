@@ -119,6 +119,51 @@ function renderView(
   }
 
   ctx.restore();
+  drawHitIndicator(ctx, viewer, ox, oy, vw, vh);
+  ctx.restore();
+}
+
+function drawHitIndicator(
+  ctx: CanvasRenderingContext2D,
+  viewer: PlayerState,
+  ox: number,
+  oy: number,
+  vw: number,
+  vh: number,
+) {
+  if (viewer.lastHitFlash <= 0) return;
+  const t = Math.min(1, viewer.lastHitFlash / 0.9);
+  const alpha = t * t;
+  const cx = ox + vw / 2;
+  const cy = oy + vh / 2;
+  const ang = viewer.lastHitAngle;
+  const reach = Math.min(vw, vh) * 0.42;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(ang);
+
+  const edge = ctx.createLinearGradient(reach - 70, 0, reach + 10, 0);
+  edge.addColorStop(0, `rgba(255, 40, 40, 0)`);
+  edge.addColorStop(1, `rgba(255, 55, 45, ${0.55 * alpha})`);
+  ctx.fillStyle = edge;
+  ctx.beginPath();
+  ctx.moveTo(reach - 80, -vh * 0.38);
+  ctx.lineTo(reach + 8, -vh * 0.18);
+  ctx.lineTo(reach + 8, vh * 0.18);
+  ctx.lineTo(reach - 80, vh * 0.38);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = `rgba(255, 210, 200, ${0.95 * alpha})`;
+  ctx.beginPath();
+  ctx.moveTo(reach - 18, 0);
+  ctx.lineTo(reach - 52, -16);
+  ctx.lineTo(reach - 44, 0);
+  ctx.lineTo(reach - 52, 16);
+  ctx.closePath();
+  ctx.fill();
+
   ctx.restore();
 }
 

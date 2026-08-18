@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import type { MatchState, PlayerState } from "@/game/types";
 import { DEFUSE_TIME, PLANT_TIME } from "@/game/types";
-import { WEAPONS, weaponBlurb } from "@/game/weapons";
+import { WEAPONS } from "@/game/weapons";
 
 function Bar({ value }: { value: number }) {
   return (
@@ -22,7 +22,7 @@ function PlayerPanel({ p, side }: { p: PlayerState; side: "left" | "right" }) {
         <span className="font-mono text-foreground">P{p.id + 1}</span>
       </div>
       <div className="flex items-baseline gap-3 font-mono tabular-nums">
-        <span className="text-2xl font-medium text-foreground">{p.alive ? p.hp : "DOWN"}</span>
+        <span className="text-lg font-medium text-foreground">{p.alive ? p.hp : "DOWN"}</span>
         <span className="text-xs text-muted-foreground">HP</span>
         <span className="text-sm text-foreground/80">{p.armor}</span>
         <span className="text-xs text-muted-foreground">AR</span>
@@ -51,7 +51,7 @@ export function GameHud({ state, localId = 0 }: { state: MatchState; localId?: 0
           : "—";
 
   return (
-    <div className="flex shrink-0 flex-col gap-2 border-b border-border bg-card px-3 py-2">
+    <div className="flex shrink-0 flex-col gap-1 border-b border-border bg-card px-3 py-1.5">
       <div className="flex items-start justify-between gap-4">
         <PlayerPanel p={me.team === "T" ? t : ct} side="left" />
         <div className="flex flex-col items-center rounded-md border border-border bg-background px-4 py-1.5">
@@ -59,10 +59,11 @@ export function GameHud({ state, localId = 0 }: { state: MatchState; localId?: 0
             Round {Math.max(1, state.round)} · First to {state.rules.winScore}
           </div>
           <div className="mt-0.5 flex items-center gap-3 font-mono text-xl tabular-nums">
-            <span className="text-[var(--t-col)]">{state.tScore}</span>
+            <span className="text-foreground">{state.pScores[0]}</span>
             <span className="text-muted-foreground">:</span>
-            <span className="text-[var(--ct-col)]">{state.ctScore}</span>
+            <span className="text-foreground">{state.pScores[1]}</span>
           </div>
+          <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">P1 · P2</div>
           <Badge variant="secondary" className="mt-1 font-mono text-[10px] tracking-widest">
             {clock}
           </Badge>

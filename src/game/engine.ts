@@ -110,6 +110,8 @@ function freshPlayer(id: 0 | 1, team: Team, money: number): PlayerState {
     plantProgress: 0,
     defuseProgress: 0,
     reloadUntil: 0,
+    lastHitAngle: 0,
+    lastHitFlash: 0,
   };
 }
 
@@ -125,6 +127,7 @@ export function createMatch(): MatchState {
     round: 0,
     tScore: 0,
     ctScore: 0,
+    pScores: [0, 0],
     timer: ROUND_TIME,
     buyTimer: BUY_TIME,
     endTimer: 0,
@@ -140,6 +143,7 @@ export function createMatch(): MatchState {
 export function startMatch(s: MatchState) {
   s.tScore = 0;
   s.ctScore = 0;
+  s.pScores = [0, 0];
   s.round = 0;
   s.winner = null;
   s.players[0].money = START_MONEY;
@@ -242,6 +246,8 @@ function finishReload(p: PlayerState) {
 
 function applyDamage(s: MatchState, victim: PlayerState, attacker: PlayerState, dmg: number) {
   if (!victim.alive) return;
+  victim.lastHitAngle = Math.atan2(attacker.y - victim.y, attacker.x - victim.x);
+  victim.lastHitFlash = 0.9;
   if (victim.armor > 0) {
     victim.armor = Math.max(0, victim.armor - Math.floor(dmg * 0.35));
   }
@@ -268,15 +274,16 @@ function endRound(s: MatchState, team: Team, reason: string) {
   s.phase = "round_end";
   s.endReason = reason;
   s.endTimer = 4;
-  if (team === "T") s.tScore += 1;
-  else s.ctScore += 1;
   for (const p of s.players) {
     const win = p.team === team;
+    if (win) s.pScores[p.id] += 1;
     p.money = Math.min(16000, p.money + (win ? WIN_MONEY : LOSS_MONEY));
   }
+  s.tScore = s.pScores[0];
+  s.ctScore = s.pScores[1];
   const need = s.rules.winScore;
-  if (s.tScore >= need || s.ctScore >= need || s.round >= s.rules.maxRounds) {
-    if (s.tScore !== s.ctScore) s.winner = s.tScore > s.ctScore ? "T" : "CT";
+  if (s.pScores[0] >= need || s.pScores[1] >= need || s.round >= s.rules.maxRounds) {
+    if (s.pScores[0] !== s.pScores[1]) s.winner = s.pScores[0] > s.pScores[1] ? "P1" : "P2";
   }
 }
 
@@ -300,6 +307,9 @@ export function tick(s: MatchState, inputs: [PlayerInput, PlayerInput], dt: numb
   }
 
   s.timer -= dt;
+  for (const p of s.players) {
+    if (p.lastHitFlash > 0) p.lastHitFlash = Math.max(0, p.lastHitFlash - dt);
+  }
   movePlayers(s, inputs, dt, true);
 
   for (const p of s.players) {

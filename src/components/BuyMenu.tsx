@@ -18,18 +18,18 @@ export function BuyMenu({
 }) {
   const p = player;
   return (
-    <div className="pointer-events-auto shrink-0 border-t border-border bg-card p-3">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-2 flex items-baseline justify-between">
-          <h3 className="font-display text-sm tracking-wide">
-            Buy · {p.team === "T" ? "Terrorist" : "Counter-Terrorist"}
+    <div className="p-2.5">
+      <div>
+        <div className="mb-1.5 flex items-baseline justify-between">
+          <h3 className="font-display text-xs tracking-wide">
+            Buy · {p.team === "T" ? "T" : "CT"}
           </h3>
-          <span className="font-mono text-sm tabular-nums text-primary">${p.money}</span>
+          <span className="font-mono text-xs tabular-nums text-primary">${p.money}</span>
         </div>
-        <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Keys 1–5 weapons · 6 kevlar · {Math.ceil(seconds)}s
+        <p className="mb-1.5 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+          B close · 1–5 guns · 6 kevlar · {Math.ceil(seconds)}s
         </p>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="grid grid-cols-2 gap-1">
           {ORDER.map((id) => {
             const w = WEAPONS[id];
             const locked = !!(w.team && w.team !== p.team);
@@ -41,12 +41,12 @@ export function BuyMenu({
                 variant={p.weapon === id ? "default" : "outline"}
                 disabled={locked || poor}
                 onClick={() => onBuy(id)}
-                className="h-auto flex-col items-start gap-0 px-3 py-1.5"
+                className="h-auto flex-col items-start gap-0 px-2 py-1"
               >
-                <span>
+                <span className="text-xs">
                   {w.name} ${w.cost}
                 </span>
-                <span className="font-mono text-[9px] font-normal opacity-70">{weaponBlurb(id)}</span>
+                <span className="font-mono text-[8px] font-normal opacity-70">{weaponBlurb(id)}</span>
               </Button>
             );
           })}
