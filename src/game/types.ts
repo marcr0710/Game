@@ -32,6 +32,7 @@ export interface WeaponDef {
 export interface PlayerState {
   id: 0 | 1;
   team: Team;
+  name: string;
   x: number;
   y: number;
   angle: number;

@@ -62,29 +62,45 @@ export function GameHud({ state, localId = 0 }: { state: MatchState; localId?: 0
             <span className="text-muted-foreground">:</span>
             <span className="text-foreground">{state.pScores[1]}</span>
           </div>
-          <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">P1 · P2</div>
+          <div className="max-w-[14rem] truncate font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+            {state.players[0].name} · {state.players[1].name}
+          </div>
           <Badge variant="secondary" className="mt-1 font-mono text-[10px] tracking-widest">
             {clock}
           </Badge>
         </div>
         <PlayerPanel p={me.team === "T" ? ct : t} side="right" />
       </div>
-      {t.plantProgress > 0 && (
-        <div className="mx-auto w-64">
+    </div>
+  );
+}
+
+export function ActionOverlay({ state }: { state: MatchState }) {
+  const t = state.players.find((p) => p.team === "T");
+  const ct = state.players.find((p) => p.team === "CT");
+  if (t && t.plantProgress > 0) {
+    return (
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center">
+        <div className="w-64 rounded-md border border-border bg-card/90 px-3 py-2 backdrop-blur-sm">
           <p className="mb-1 text-center font-mono text-[10px] uppercase tracking-widest text-[var(--t-col)]">
             Planting
           </p>
           <Bar value={(t.plantProgress / PLANT_TIME) * 100} />
         </div>
-      )}
-      {ct.defuseProgress > 0 && (
-        <div className="mx-auto w-64">
+      </div>
+    );
+  }
+  if (ct && ct.defuseProgress > 0) {
+    return (
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center">
+        <div className="w-64 rounded-md border border-border bg-card/90 px-3 py-2 backdrop-blur-sm">
           <p className="mb-1 text-center font-mono text-[10px] uppercase tracking-widest text-[var(--ct-col)]">
             Defusing
           </p>
           <Bar value={(ct.defuseProgress / DEFUSE_TIME) * 100} />
         </div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
+  return null;
 }

@@ -89,13 +89,14 @@ function pickSpawn(team: Team): { x: number; y: number } {
   return mid;
 }
 
-function freshPlayer(id: 0 | 1, team: Team, money: number): PlayerState {
+function freshPlayer(id: 0 | 1, team: Team, money: number, name = ""): PlayerState {
   const s = pickSpawn(team);
   const w = defaultWeapon(team);
   const def = WEAPONS[w];
   return {
     id,
     team,
+    name: name.trim() || (id === 0 ? "P1" : "P2"),
     x: s.x,
     y: s.y,
     angle: team === "T" ? 0 : Math.PI,
@@ -162,10 +163,17 @@ export function beginRound(s: MatchState) {
   s.bomb = { planted: false, x: 0, y: 0, fuse: s.rules.fuse, defused: false };
   const money0 = s.players[0].money;
   const money1 = s.players[1].money;
+  const name0 = s.players[0].name;
+  const name1 = s.players[1].name;
   const p0Team = s.round % 2 === 1 ? "T" : "CT";
   const p1Team = p0Team === "T" ? "CT" : "T";
-  s.players[0] = freshPlayer(0, p0Team, Math.min(16000, money0));
-  s.players[1] = freshPlayer(1, p1Team, Math.min(16000, money1));
+  s.players[0] = freshPlayer(0, p0Team, Math.min(16000, money0), name0);
+  s.players[1] = freshPlayer(1, p1Team, Math.min(16000, money1), name1);
+}
+
+export function setPlayerName(p: PlayerState, name: string) {
+  const clean = name.trim().slice(0, 16);
+  p.name = clean || (p.id === 0 ? "P1" : "P2");
 }
 
 export function buyWeapon(p: PlayerState, id: WeaponId) {

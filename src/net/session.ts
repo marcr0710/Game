@@ -4,7 +4,8 @@ import type { PlayerInput } from "@/game/engine";
 
 export type NetMsg =
   | { t: "hello"; name: string }
-  | { t: "ready" }
+  | { t: "ready"; name: string }
+  | { t: "name"; name: string }
   | { t: "input"; input: PlayerInput }
   | { t: "buy"; weapon: WeaponId }
   | { t: "armor" }
@@ -64,7 +65,7 @@ export class NetSession {
     });
   }
 
-  async join(code: string): Promise<void> {
+  async join(code: string, name = ""): Promise<void> {
     this.destroy();
     this.role = "guest";
     this.code = code;
@@ -82,7 +83,7 @@ export class NetSession {
       c.on("open", () => {
         this.attach(c);
         this.setStatus("connected");
-        this.send({ t: "hello", name: "guest" });
+        this.send({ t: "hello", name });
         resolve();
       });
       c.on("error", (e) => {

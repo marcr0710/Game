@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { BuyMenu, tryBuyHotkeys } from "@/components/BuyMenu";
-import { GameHud } from "@/components/GameHud";
+import { ActionOverlay, GameHud } from "@/components/GameHud";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BlurFade } from "@/components/ui/blur-fade";
 import {
   buyArmor,
   buyWeapon,
   createMatch,
+  setPlayerName,
   EMPTY_INPUT,
   inputFromKeys,
   startMatch,
@@ -45,6 +46,26 @@ export default function App() {
   const [winScore, setWinScore] = useState(4);
   const [fuse, setFuse] = useState(35);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [playerName, setNameDraft] = useState(() => {
+    try {
+      return localStorage.getItem("dustline-name") ?? "";
+    } catch {
+      return "";
+    }
+  });
+
+  const commitName = (raw: string) => {
+    const clean = raw.trim().slice(0, 16);
+    setNameDraft(clean);
+    try {
+      localStorage.setItem("dustline-name", clean);
+    } catch {
+      /* ignore */
+    }
+    setPlayerName(stateRef.current.players[localIdRef.current], clean);
+    if (netRef.current.role === "guest") netRef.current.send({ t: "name", name: clean });
+    setUi((n) => n + 1);
+  };
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -58,9 +79,17 @@ export default function App() {
       const s = stateRef.current;
       if (msg.t === "hello" && net.role === "host") {
         setConnected(true);
-        net.send({ t: "ready" });
+        setPlayerName(s.players[1], msg.name);
+        net.send({ t: "ready", name: s.players[0].name });
       }
-      if (msg.t === "ready") setConnected(true);
+      if (msg.t === "ready") {
+        setConnected(true);
+        if (msg.name) setPlayerName(s.players[0], msg.name);
+      }
+      if (msg.t === "name") {
+        const other = net.role === "host" ? s.players[1] : s.players[0];
+        setPlayerName(other, msg.name);
+      }
       if (msg.t === "input" && net.role === "host") {
         remoteInputRef.current = msg.input;
       }
@@ -213,6 +242,7 @@ export default function App() {
     setCode(c);
     localIdRef.current = 0;
     setRole("host");
+    commitName(playerName);
     try {
       await netRef.current.host(c);
     } catch {
@@ -245,6 +275,7 @@ export default function App() {
 
   const launch = () => {
     applyRules();
+    commitName(playerName);
     startMatch(stateRef.current);
     netRef.current.send({ t: "start" });
     netRef.current.send({ t: "state", state: stateRef.current });
@@ -257,6 +288,7 @@ export default function App() {
     setRole("solo");
     setStatus("solo practice");
     applyRules();
+    commitName(playerName);
     setBuyOpen(true);
     startMatch(stateRef.current);
     setUi((n) => n + 1);
@@ -300,6 +332,7 @@ export default function App() {
         {s.phase !== "menu" && <GameHud state={s} localId={localId} />}
         <div className="relative min-h-0 flex-1 bg-[#070b10]">
           <canvas ref={canvasRef} className="block h-full w-full cursor-crosshair touch-none" />
+          {s.phase !== "menu" && <ActionOverlay state={s} />}
           {s.phase === "round_end" && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/40">
               <BlurFade>
@@ -327,6 +360,19 @@ export default function App() {
                         clear ray. Works on a static Vercel deploy — no game server.
                       </p>
                     </div>
+                    <label className="block space-y-1">
+                      <span className="font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+                        Callsign
+                      </span>
+                      <Input
+                        value={playerName}
+                        onChange={(e) => setNameDraft(e.target.value.slice(0, 16))}
+                        onBlur={() => commitName(playerName)}
+                        placeholder="Your name"
+                        maxLength={16}
+                        className="font-mono"
+                      />
+                    </label>
                     <div className="grid grid-cols-3 gap-3">
                       <RuleField
                         label="Rounds"
